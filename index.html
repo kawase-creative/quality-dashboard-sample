@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>工程内不良モニター(sample)</title>
+<title>工程内不良モニター(見本)</title>
 <style>
   :root{
     --bg:#f4f7fb; --card:#fff; --text:#1f2937; --muted:#7b8794;
@@ -15,7 +15,7 @@
   body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Yu Gothic UI","Meiryo",sans-serif}
   .app{min-height:100vh;padding:20px}
   .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .brand h1{font-size:22px;margin:0}.brand small{color:var(--muted)}
+  .brand h1{font-size:24px;margin:0}.brand small{color:var(--muted)}
   .updated{font-size:12px;color:var(--muted)}
   .top-actions{display:flex;align-items:center;gap:12px}
   .lang-switch{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:none}
@@ -117,7 +117,7 @@
     .lang-switch{flex-wrap:nowrap}
     .lang-btn{height:34px;font-size:11px;padding:0 8px}
     .brand-row{align-items:flex-start;gap:8px}
-    .brand h1{font-size:19px;line-height:1.35}
+    .brand h1{font-size:21px;line-height:1.35}
     .info-btn{width:42px;height:42px;min-width:42px;border-radius:11px}
     .info-btn svg{width:19px;height:19px}
     .filters{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}
@@ -169,7 +169,7 @@
     .topbar{margin-bottom:12px}
     .brand{min-width:0}
     .brand-row{width:100%}
-    .brand h1{font-size:17px;word-break:keep-all}
+    .brand h1{font-size:21px;word-break:keep-all}
     .brand small{font-size:10px}
     .updated{display:none}
     .filters{grid-template-columns:minmax(0,1fr);gap:9px;border-radius:14px}
@@ -202,12 +202,12 @@
 <div class="app">
 <div class="page-view" id="dashboardView">
   <div class="topbar">
-    <div class="brand"><div class="brand-row"><h1 data-i18n="title">工程内不良モニター(sample)</h1></div><small data-i18n="subtitle">Quality Monitor / Sample</small></div>
+    <div class="brand"><div class="brand-row"><h1 data-i18n="title">工程内不良モニター(見本)</h1></div><small data-i18n="subtitle">Quality Monitor / Sample</small></div>
     <div class="top-actions"><div class="lang-switch" aria-label="Language"><button type="button" class="lang-btn active" data-lang="ja">日本語</button><button type="button" class="lang-btn" data-lang="en">English</button><button type="button" class="lang-btn" data-lang="zh">中文</button></div><button type="button" class="info-btn" id="openInfo" title="マニュアル / UI・UX設計" aria-label="マニュアル / UI・UX設計"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 10.8v5.2"></path><path d="M12 7.5h.01"></path></svg></button><div class="updated" id="updated">最終更新: --:--</div></div>
   </div>
 
   <div class="filters">
-    <div><label data-i18n="site">拠点</label><select id="site"><option value="すべて" data-i18n="all">すべて</option><option>JP</option><option>TT</option></select></div>
+    <div><label data-i18n="site">拠点</label><select id="site"><option value="すべて" data-i18n="all">すべて</option><option value="JP" data-i18n="domestic">国内</option><option value="TT" data-i18n="overseas">海外</option></select></div>
     <div><label data-i18n="lineGroup">ライン群</label><select id="line"><option value="すべて" data-i18n="all">すべて</option><option>G5</option><option>G6</option></select></div>
     <div><label data-i18n="inspector">検査者</label><select id="inspector"><option value="すべて" data-i18n="all">すべて</option><option value="外観" data-i18n="visual">外観</option><option value="寸法" data-i18n="dimension">寸法</option></select></div>
     <div><label data-i18n="startDate">開始日</label><input id="from" type="date"></div>
@@ -257,7 +257,7 @@
     <div class="info-title-wrap">
       <button class="back-btn" id="backDashboard" data-i18n="back">← ダッシュボードへ戻る</button>
       <div>
-        <h1 style="margin:0;font-size:22px" data-i18n="title">工程内不良モニター(sample)</h1>
+        <h1 style="margin:0;font-size:24px" data-i18n="title">工程内不良モニター(見本)</h1>
         <div style="color:var(--muted);font-size:12px;margin-top:4px">Manual / UI・UX Design</div>
       </div>
     </div>
@@ -358,9 +358,9 @@
 <script>
 let currentLang = 'ja';
 const I18N = {
-  ja:{title:'工程内不良モニター(sample)',subtitle:'Quality Monitor / Sample',site:'拠点',lineGroup:'ライン群',inspector:'検査者',startDate:'開始日',endDate:'終了日',search:'検索',all:'すべて',visual:'外観',dimension:'寸法',clearChart:'チャート絞り込み解除',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'現在の評価',topFilterOnly:'上部の検索条件のみ反映',kpiNoRelation:'チャート選択とは連動しません',paretoTitle:'不良内容 パレート図',paretoTag:'累積80%を重点管理',partDefects:'品番別 不良数',lineDefects:'ライン別 不良数',finishDefects:'仕上別 不良数',clickLink:'クリックで連動',detailTitle:'不良明細',downloadCsv:'CSVダウンロード',back:'← ダッシュボードへ戻る',manualTab:'操作マニュアル',uxTab:'UI / UX 設計',dateTime:'日時',line:'ライン',part:'品番',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'チャートをクリックすると連動フィルタがかかります',detailCount:n=>`全${n.toLocaleString('ja-JP')}件`,updated:t=>`最終更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'目標水準をクリアしています',warningSub:'改善が必要な水準です',badSub:'優先改善が必要な水準です',noData:'対象データがありません',csvNoData:'ダウンロード対象の不良明細がありません。',csvName:'不良明細',unit:'台',defectChip:'不良内容',partChip:'品番',lineChip:'ライン',finishChip:'仕上'},
-  en:{title:'In-Process Defect Monitor (Sample)',subtitle:'Quality Monitor / Sample',site:'Site',lineGroup:'Line group',inspector:'Inspector',startDate:'Start date',endDate:'End date',search:'Search',all:'All',visual:'Visual',dimension:'Dimension',clearChart:'Clear chart filters',goodCount:'Good units',defectCount:'Defects',defectRate:'Defect rate',rating:'Rating',topFilterOnly:'Reflects top search conditions only',kpiNoRelation:'Not affected by chart selections',paretoTitle:'Defect Pareto Chart',paretoTag:'Focus on cumulative 80%',partDefects:'Defects by Part No.',lineDefects:'Defects by Line',finishDefects:'Defects by Finish',clickLink:'Click to cross-filter',detailTitle:'Defect details',downloadCsv:'Download CSV',back:'← Back to monitor',manualTab:'User Manual',uxTab:'UI / UX Design',dateTime:'Date / Time',line:'Line',part:'Part No.',finish:'Finish',defectContent:'Defect',judgment:'Result',filterHint:'Click a chart bar to apply a cross-filter',detailCount:n=>`${n.toLocaleString('en-US')} records`,updated:t=>`Updated: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'Target level achieved',warningSub:'Improvement is recommended',badSub:'Priority improvement required',noData:'No matching data',csvNoData:'No defect details are available to download.',csvName:'defect_details',unit:'units',defectChip:'Defect',partChip:'Part',lineChip:'Line',finishChip:'Finish'},
-  zh:{title:'制程不良监控器（Sample）',subtitle:'Quality Monitor / Sample',site:'据点',lineGroup:'产线组',inspector:'检验类型',startDate:'开始日期',endDate:'结束日期',search:'查询',all:'全部',visual:'外观',dimension:'尺寸',clearChart:'清除图表筛选',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'当前评价',topFilterOnly:'仅反映上方查询条件',kpiNoRelation:'不随图表选择联动',paretoTitle:'不良内容 帕累托图',paretoTag:'重点管理累计80%',partDefects:'按品号不良数',lineDefects:'按产线不良数',finishDefects:'按仕上不良数',clickLink:'点击联动筛选',detailTitle:'不良明细',downloadCsv:'下载 CSV',back:'← 返回监控器',manualTab:'操作手册',uxTab:'UI / UX 设计',dateTime:'日期时间',line:'产线',part:'品号',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'点击图表柱形可进行联动筛选',detailCount:n=>`共 ${n.toLocaleString('zh-CN')} 条`,updated:t=>`最后更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'已达到目标水平',warningSub:'建议改善',badSub:'需要优先改善',noData:'没有符合条件的数据',csvNoData:'没有可下载的不良明细。',csvName:'不良明细',unit:'台',defectChip:'不良内容',partChip:'品号',lineChip:'产线',finishChip:'仕上'}
+  ja:{title:'工程内不良モニター(見本)',subtitle:'Quality Monitor / Sample',site:'拠点',lineGroup:'ライン群',inspector:'検査者',startDate:'開始日',endDate:'終了日',search:'検索',all:'すべて',domestic:'国内',overseas:'海外',visual:'外観',dimension:'寸法',clearChart:'チャート絞り込み解除',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'現在の評価',topFilterOnly:'上部の検索条件のみ反映',kpiNoRelation:'チャート選択とは連動しません',paretoTitle:'不良内容 パレート図',paretoTag:'累積80%を重点管理',partDefects:'品番別 不良数',lineDefects:'ライン別 不良数',finishDefects:'仕上別 不良数',clickLink:'クリックで連動',detailTitle:'不良明細',downloadCsv:'CSVダウンロード',back:'← ダッシュボードへ戻る',manualTab:'操作マニュアル',uxTab:'UI / UX 設計',dateTime:'日時',line:'ライン',part:'品番',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'チャートをクリックすると連動フィルタがかかります',detailCount:n=>`全${n.toLocaleString('ja-JP')}件`,updated:t=>`最終更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'目標水準をクリアしています',warningSub:'改善が必要な水準です',badSub:'優先改善が必要な水準です',noData:'対象データがありません',csvNoData:'ダウンロード対象の不良明細がありません。',csvName:'不良明細',unit:'台',defectChip:'不良内容',partChip:'品番',lineChip:'ライン',finishChip:'仕上'},
+  en:{title:'In-Process Defect Monitor (Sample)',subtitle:'Quality Monitor / Sample',site:'Site',lineGroup:'Line group',inspector:'Inspector',startDate:'Start date',endDate:'End date',search:'Search',all:'All',domestic:'Domestic',overseas:'Overseas',visual:'Visual',dimension:'Dimension',clearChart:'Clear chart filters',goodCount:'Good units',defectCount:'Defects',defectRate:'Defect rate',rating:'Rating',topFilterOnly:'Reflects top search conditions only',kpiNoRelation:'Not affected by chart selections',paretoTitle:'Defect Pareto Chart',paretoTag:'Focus on cumulative 80%',partDefects:'Defects by Part No.',lineDefects:'Defects by Line',finishDefects:'Defects by Finish',clickLink:'Click to cross-filter',detailTitle:'Defect details',downloadCsv:'Download CSV',back:'← Back to monitor',manualTab:'User Manual',uxTab:'UI / UX Design',dateTime:'Date / Time',line:'Line',part:'Part No.',finish:'Finish',defectContent:'Defect',judgment:'Result',filterHint:'Click a chart bar to apply a cross-filter',detailCount:n=>`${n.toLocaleString('en-US')} records`,updated:t=>`Updated: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'Target level achieved',warningSub:'Improvement is recommended',badSub:'Priority improvement required',noData:'No matching data',csvNoData:'No defect details are available to download.',csvName:'defect_details',unit:'units',defectChip:'Defect',partChip:'Part',lineChip:'Line',finishChip:'Finish'},
+  zh:{title:'制程不良监控器（示例）',subtitle:'Quality Monitor / Sample',site:'据点',lineGroup:'产线组',inspector:'检验类型',startDate:'开始日期',endDate:'结束日期',search:'查询',all:'全部',domestic:'国内',overseas:'海外',visual:'外观',dimension:'尺寸',clearChart:'清除图表筛选',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'当前评价',topFilterOnly:'仅反映上方查询条件',kpiNoRelation:'不随图表选择联动',paretoTitle:'不良内容 帕累托图',paretoTag:'重点管理累计80%',partDefects:'按品号不良数',lineDefects:'按产线不良数',finishDefects:'按仕上不良数',clickLink:'点击联动筛选',detailTitle:'不良明细',downloadCsv:'下载 CSV',back:'← 返回监控器',manualTab:'操作手册',uxTab:'UI / UX 设计',dateTime:'日期时间',line:'产线',part:'品号',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'点击图表柱形可进行联动筛选',detailCount:n=>`共 ${n.toLocaleString('zh-CN')} 条`,updated:t=>`最后更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'已达到目标水平',warningSub:'建议改善',badSub:'需要优先改善',noData:'没有符合条件的数据',csvNoData:'没有可下载的不良明细。',csvName:'不良明细',unit:'台',defectChip:'不良内容',partChip:'品号',lineChip:'产线',finishChip:'仕上'}
 };
 const DEFECT_LABELS={
   'ろう付け不良':{ja:'ろう付け不良',en:'Brazing defect',zh:'钎焊不良'},
@@ -378,6 +378,7 @@ function t(key){ const v=I18N[currentLang]?.[key] ?? I18N.ja[key] ?? key; return
 function defectLabel(key){ return DEFECT_LABELS[key]?.[currentLang] || key; }
 function areaLabel(key){ return AREA_LABELS[key]?.[currentLang] || key; }
 function inspectorLabel(key){ return key==='外観'?t('visual'):key==='寸法'?t('dimension'):key; }
+function siteLabel(key){ return key==='JP'?t('domestic'):key==='TT'?t('overseas'):key; }
 function applyStaticLanguage(){
   document.documentElement.lang=currentLang==='zh'?'zh-CN':currentLang;
   document.title=t('title');
@@ -716,10 +717,10 @@ function renderPareto(){
   data.forEach((d,i)=>{
     const x = L + i*gap + gap/2;
     const y = h-B+18;
-    ctx.save(); ctx.translate(x,y); ctx.rotate(-Math.PI/4.4);
+    ctx.save(); ctx.translate(x,y); ctx.rotate(mobile?Math.PI/3:-Math.PI/4.4);
     ctx.fillStyle = selection.defect === d.key ? '#b91c1c' : '#475569';
-    ctx.font = selection.defect === d.key ? 'bold 11px sans-serif' : '11px sans-serif';
-    ctx.textAlign = 'right'; ctx.fillText(defectLabel(d.key), 0, 0); ctx.restore();
+    ctx.font = selection.defect === d.key ? `bold ${mobile?9:11}px sans-serif` : `${mobile?9:11}px sans-serif`;
+    ctx.textAlign = mobile?'center':'right'; ctx.fillText(defectLabel(d.key), 0, 0); ctx.restore();
   });
 }
 
@@ -763,9 +764,9 @@ function renderSimpleBars(canvasId, data, dim, isPercent){
     ctx.font=mobile?'9px sans-serif':'11px sans-serif';
     if(mobile && dim==='line'){
       ctx.save();
-      ctx.translate(x+bw/2,h-8);
-      ctx.rotate(-Math.PI/4.5);
-      ctx.textAlign='right';
+      ctx.translate(x+bw/2,h-B+18);
+      ctx.rotate(Math.PI/4.5);
+      ctx.textAlign='center';
       ctx.fillText(d.label,0,0);
       ctx.restore();
     }else{
@@ -784,7 +785,7 @@ function renderTable(){
   tbody.innerHTML = rows.length ? rows.map(r => `
     <tr>
       <td data-label="${t('dateTime')}">${r.datetime.replace(/-/g,'/')}</td>
-      <td data-label="${t('site')}">${r.site}</td>
+      <td data-label="${t('site')}">${siteLabel(r.site)}</td>
       <td data-label="${t('line')}">${r.line}</td>
       <td data-label="${t('part')}">${r.part}</td>
       <td data-label="${t('finish')}">${r.finish}</td>
@@ -804,7 +805,7 @@ function downloadCurrentCsv(){
   const headers = currentLang==='en'?['Date/Time','Site','Line','Part No.','Finish','Defect','Area','Inspector','Result']:currentLang==='zh'?['日期时间','据点','产线','品号','仕上','不良内容','不良部位','检验类型','判定']:['日時','拠点','ライン','品番','仕上','不良内容','不良部位','検査者','判定'];
   const lines = [headers.map(csvEscape).join(',')];
   rows.forEach(r => {
-    lines.push([r.datetime,r.site,r.line,r.part,r.finish,defectLabel(r.defect),areaLabel(r.area),inspectorLabel(r.inspector),'NG'].map(csvEscape).join(','));
+    lines.push([r.datetime,siteLabel(r.site),r.line,r.part,r.finish,defectLabel(r.defect),areaLabel(r.area),inspectorLabel(r.inspector),'NG'].map(csvEscape).join(','));
   });
   const csv = '\uFEFF' + lines.join('\r\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
