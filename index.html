@@ -25,7 +25,9 @@
 
   .filters{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px}
   label{font-size:11px;color:var(--muted);display:block;margin:0 0 5px 2px}
-  select,input,button{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 12px;font:inherit}
+  .filters>div{min-width:0}
+  select,input,button{width:100%;min-width:0;max-width:100%;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 12px;font:inherit}
+  input[type="date"]{min-inline-size:0;-webkit-min-logical-width:0;display:block}
   button{background:var(--green);color:#fff;border:none;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 6px 14px rgba(22,163,74,.18)}
   button:hover{filter:brightness(.96);transform:translateY(-1px)}
   .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);padding:10px 14px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
@@ -52,8 +54,9 @@
   .muted{color:var(--muted)}
 
   .brand-row{display:flex;align-items:center;gap:10px}
-  .info-btn{width:34px;height:34px;border-radius:50%;padding:0;background:#fff;color:#475569;border:1px solid var(--line);box-shadow:none;font-size:18px;font-weight:800;display:grid;place-items:center}
-  .info-btn:hover{background:#f8fafc;transform:none;filter:none}
+  .info-btn{width:36px;height:36px;min-width:36px;border-radius:10px;padding:0;background:#fff;color:#334155;border:1px solid #dce3eb;box-shadow:0 3px 10px rgba(28,39,49,.06);display:grid;place-items:center}
+  .info-btn svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .info-btn:hover{background:#f8fafc;color:#111827;transform:none;filter:none;border-color:#cbd5e1}
   .page-view{display:block}
   .info-view{display:none;min-height:calc(100vh - 40px)}
   .info-view.active{display:block}
@@ -110,12 +113,13 @@
     body{overflow-x:hidden}
     .app{padding:12px}
     .topbar{align-items:flex-start;gap:10px;flex-wrap:wrap}
-    .top-actions{width:100%;justify-content:space-between;gap:8px}
+    .top-actions{width:100%;justify-content:flex-start;gap:8px}
     .lang-switch{flex-wrap:nowrap}
     .lang-btn{height:34px;font-size:11px;padding:0 8px}
     .brand-row{align-items:flex-start;gap:8px}
     .brand h1{font-size:19px;line-height:1.35}
-    .info-btn{width:40px;height:40px;min-width:40px;font-size:19px}
+    .info-btn{width:42px;height:42px;min-width:42px;border-radius:11px}
+    .info-btn svg{width:19px;height:19px}
     .filters{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}
     select,input,button{height:44px;font-size:16px}
     .toolbar{padding:12px;align-items:stretch}
@@ -138,9 +142,17 @@
     .small-chart .chart-scroll canvas{width:100%!important;min-width:0!important;max-width:100%!important}
     #pareto{height:410px}
     .small-chart canvas{height:220px}
-    .table-wrap{max-height:460px}
-    table{font-size:11px}
-    th,td{padding:9px 10px}
+    .table-wrap{max-height:560px;overflow-x:hidden;overflow-y:auto;border:0;border-radius:0;padding:2px;background:transparent}
+    table,tbody{display:block;width:100%;white-space:normal}
+    table{font-size:12px}
+    thead{display:none}
+    tbody{display:grid;gap:10px}
+    tbody tr{display:block;background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:7px 10px;overflow:hidden}
+    tbody td{display:grid;grid-template-columns:minmax(76px,.7fr) minmax(0,1.3fr);gap:10px;align-items:center;width:100%;padding:7px 3px;border-bottom:1px solid #e9edf2;text-align:right;white-space:normal;overflow-wrap:anywhere}
+    tbody td::before{content:attr(data-label);color:var(--muted);font-size:11px;font-weight:700;text-align:left}
+    tbody td:last-child{border-bottom:0}
+    tbody td.no-data{display:block;text-align:center;padding:20px 8px}
+    tbody td.no-data::before{display:none}
     .info-header{align-items:flex-start;flex-wrap:wrap}
     .info-lang{width:auto}
     .info-title-wrap{flex-direction:column;align-items:flex-start;width:100%}
@@ -190,8 +202,8 @@
 <div class="app">
 <div class="page-view" id="dashboardView">
   <div class="topbar">
-    <div class="brand"><div class="brand-row"><h1 data-i18n="title">工程内不良モニター(sample)</h1><button class="info-btn" id="openInfo" title="マニュアル / UI・UX設計">ℹ</button></div><small data-i18n="subtitle">Quality Monitor / Sample</small></div>
-    <div class="top-actions"><div class="lang-switch" aria-label="Language"><button type="button" class="lang-btn active" data-lang="ja">日本語</button><button type="button" class="lang-btn" data-lang="en">English</button><button type="button" class="lang-btn" data-lang="zh">中文</button></div><div class="updated" id="updated">最終更新: --:--</div></div>
+    <div class="brand"><div class="brand-row"><h1 data-i18n="title">工程内不良モニター(sample)</h1></div><small data-i18n="subtitle">Quality Monitor / Sample</small></div>
+    <div class="top-actions"><div class="lang-switch" aria-label="Language"><button type="button" class="lang-btn active" data-lang="ja">日本語</button><button type="button" class="lang-btn" data-lang="en">English</button><button type="button" class="lang-btn" data-lang="zh">中文</button></div><button type="button" class="info-btn" id="openInfo" title="マニュアル / UI・UX設計" aria-label="マニュアル / UI・UX設計"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 10.8v5.2"></path><path d="M12 7.5h.01"></path></svg></button><div class="updated" id="updated">最終更新: --:--</div></div>
   </div>
 
   <div class="filters">
@@ -771,15 +783,15 @@ function renderTable(){
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = rows.length ? rows.map(r => `
     <tr>
-      <td>${r.datetime.replace(/-/g,'/')}</td>
-      <td>${r.site}</td>
-      <td>${r.line}</td>
-      <td>${r.part}</td>
-      <td>${r.finish}</td>
-      <td>${defectLabel(r.defect)}</td>
-      <td>${inspectorLabel(r.inspector)}</td>
-      <td><span class="dot dred"></span>NG</td>
-    </tr>`).join('') : `<tr><td colspan="8" class="muted">${t('noData')}</td></tr>`;
+      <td data-label="${t('dateTime')}">${r.datetime.replace(/-/g,'/')}</td>
+      <td data-label="${t('site')}">${r.site}</td>
+      <td data-label="${t('line')}">${r.line}</td>
+      <td data-label="${t('part')}">${r.part}</td>
+      <td data-label="${t('finish')}">${r.finish}</td>
+      <td data-label="${t('defectContent')}">${defectLabel(r.defect)}</td>
+      <td data-label="${t('inspector')}">${inspectorLabel(r.inspector)}</td>
+      <td data-label="${t('judgment')}"><span><span class="dot dred"></span>NG</span></td>
+    </tr>`).join('') : `<tr><td colspan="8" class="muted no-data">${t('noData')}</td></tr>`;
 }
 
 function csvEscape(value){
