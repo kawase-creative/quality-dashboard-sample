@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>工程内不良モニター(sample)</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#fff; --text:#1f2937; --muted:#7b8794;
+    --line:#e7ebf0; --red:#e60012; --red2:#ff5a66; --blue:#8fb6dc;
+    --green:#16a34a; --orange:#f59e0b; --shadow:0 8px 24px rgba(28,39,49,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Yu Gothic UI","Meiryo",sans-serif}
+  .app{min-height:100vh;padding:20px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .brand h1{font-size:22px;margin:0}.brand small{color:var(--muted)}
+  .updated{font-size:12px;color:var(--muted)}
+  .top-actions{display:flex;align-items:center;gap:12px}
+  .lang-switch{display:flex;align-items:center;gap:4px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:none}
+  .lang-btn{width:auto;height:30px;padding:0 9px;border-radius:7px;background:transparent;color:#64748b;border:none;box-shadow:none;font-size:11px;font-weight:700}
+  .lang-btn.active{background:#111827;color:#fff}
+  .lang-btn:hover{transform:none;filter:none;background:#f1f5f9}.lang-btn.active:hover{background:#111827}
+
+  .filters{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px}
+  label{font-size:11px;color:var(--muted);display:block;margin:0 0 5px 2px}
+  select,input,button{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 12px;font:inherit}
+  button{background:var(--green);color:#fff;border:none;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 6px 14px rgba(22,163,74,.18)}
+  button:hover{filter:brightness(.96);transform:translateY(-1px)}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);padding:10px 14px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:28px;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#fff0f2;color:#b91c1c;border:1px solid #ffd3d8;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+  .chip-muted{color:var(--muted);font-size:12px}
+  .clear-btn{background:#fff;color:#334155;border:1px solid var(--line);box-shadow:none;padding:0 14px;width:auto;min-width:108px}
+  .clear-btn:hover{transform:none;filter:none;background:#f8fafc}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .kpi{min-height:128px}
+  .kpi .label{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:15px}.value{font-size:34px;font-weight:800;letter-spacing:-1px}.unit{font-size:16px;margin-left:4px}.sub{font-size:12px;color:var(--muted);margin-top:8px}
+  .value.red{color:var(--red)} .value.blue{color:#1d4ed8}
+  .status{display:flex;align-items:center;gap:12px}.status-ico{font-size:58px;line-height:1;font-family:Arial,"Segoe UI Symbol",sans-serif;font-variant-emoji:text}.status-ico.good{color:var(--red)}.status-ico.warning{color:#6b7280}.status-ico.bad{color:#2563eb}.status-text b{font-size:20px}.status-text span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+  .grid-main{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+  .grid-three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.card-title{font-weight:800;font-size:15px}.tag{font-size:11px;color:var(--red);background:#fff0f2;border-radius:99px;padding:5px 8px}
+  .card-actions{display:flex;align-items:center;gap:8px}.download-btn{width:auto;height:34px;padding:0 14px;border-radius:9px;background:var(--green);box-shadow:none;font-size:12px}.download-btn:hover{transform:none}
+  canvas{width:100%;height:280px;display:block;cursor:pointer}.small-chart canvas{height:230px}#pareto{height:360px}
+  .table-wrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}th{position:sticky;top:0;background:#f8fafc;color:#64748b;z-index:1}tr:hover td{background:#fafbfc}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}.dred{background:var(--red)}
+  .muted{color:var(--muted)}
+
+  .brand-row{display:flex;align-items:center;gap:10px}
+  .info-btn{width:34px;height:34px;border-radius:50%;padding:0;background:#fff;color:#475569;border:1px solid var(--line);box-shadow:none;font-size:18px;font-weight:800;display:grid;place-items:center}
+  .info-btn:hover{background:#f8fafc;transform:none;filter:none}
+  .page-view{display:block}
+  .info-view{display:none;min-height:calc(100vh - 40px)}
+  .info-view.active{display:block}
+  .page-view.hidden{display:none}
+  .info-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .info-title-wrap{display:flex;align-items:center;gap:12px}
+  .back-btn{width:auto;height:38px;padding:0 14px;background:#fff;color:#334155;border:1px solid var(--line);box-shadow:none}
+  .back-btn:hover{background:#f8fafc;transform:none;filter:none}
+  .info-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .info-tab{width:auto;height:38px;padding:0 16px;background:#fff;color:#475569;border:1px solid var(--line);box-shadow:none}
+  .info-tab.active{background:#111827;color:#fff;border-color:#111827}
+  .info-tab:hover{transform:none;filter:none}
+  .info-panel{display:none}
+  .info-panel.active{display:block}
+  .manual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .manual-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:20px;border:1px solid #eef2f6}
+  .manual-card h3{margin:0 0 10px;font-size:16px}
+  .manual-card p{margin:0;color:#5f6b7a;font-size:13px;line-height:1.8}
+  .manual-step{display:flex;gap:12px;align-items:flex-start;margin-top:12px}
+  .step-num{min-width:30px;height:30px;border-radius:50%;background:#111827;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+  .legend-row{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:#475569}
+  .legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .ux-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+  .ux-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:20px;border:1px solid #eef2f6}
+  .ux-card h3{margin:0 0 10px;font-size:16px}
+  .ux-card p,.ux-card li{font-size:13px;line-height:1.8;color:#5f6b7a}
+  .ux-card ul{margin:8px 0 0;padding-left:20px}
+  .token-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .token{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafcff}
+  .swatch{width:100%;height:38px;border-radius:8px;margin-bottom:8px;border:1px solid rgba(0,0,0,.04)}
+  .token b{font-size:12px;display:block}.token span{font-size:11px;color:#7b8794}.token-note{margin:8px 0 0!important;font-size:11px!important;line-height:1.6!important;color:#64748b!important}
+  .spec-table{width:100%;border-collapse:collapse;font-size:12px;white-space:normal}
+  .spec-table th,.spec-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .spec-table th{position:static;background:#f8fafc;color:#475569}
+  .note-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;color:#9a3412;font-size:12px;line-height:1.7;margin-top:12px}
+
+  .chart-scroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;overscroll-behavior-x:contain}
+  .chart-scroll canvas{display:block}
+
+  @media (hover:none){
+    button:hover{filter:none;transform:none}
+  }
+
+  @media (max-width:768px){
+    body{overflow-x:hidden}
+    .app{padding:12px}
+    .topbar{align-items:flex-start;gap:10px;flex-wrap:wrap}
+    .top-actions{width:100%;justify-content:space-between;gap:8px}
+    .lang-switch{flex-wrap:nowrap}
+    .lang-btn{height:34px;font-size:11px;padding:0 8px}
+    .brand-row{align-items:flex-start;gap:8px}
+    .brand h1{font-size:19px;line-height:1.35}
+    .info-btn{width:40px;height:40px;min-width:40px;font-size:19px}
+    .filters{grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+    select,input,button{height:44px;font-size:16px}
+    .toolbar{padding:12px;align-items:stretch}
+    .chips{min-width:0}
+    .chip{max-width:100%;white-space:normal;line-height:1.4}
+    .clear-btn{width:100%;height:44px}
+    .kpis{grid-template-columns:1fr 1fr;gap:10px}
+    .card{padding:14px;border-radius:14px}
+    .kpi{min-height:118px}
+    .kpi .label{margin-bottom:10px}
+    .value{font-size:28px}
+    .status{gap:12px}.status-ico{font-size:64px}.status-text b{font-size:17px}
+    .grid-main,.grid-three{gap:12px;margin-bottom:12px}
+    .card-head{align-items:flex-start;gap:8px;flex-wrap:wrap}
+    .card-actions{width:auto;margin-left:auto;justify-content:flex-end;gap:8px}
+    .download-btn{height:40px;flex:none;width:auto;min-width:120px;padding:0 12px;white-space:nowrap}
+    .tag{font-size:10px}
+    .chart-scroll{margin:0 -2px;padding-bottom:4px}
+    .chart-scroll-pareto{overflow-x:hidden}.chart-scroll-pareto canvas{width:100%!important;min-width:0!important;max-width:100%!important;height:430px!important}
+    .small-chart .chart-scroll canvas{min-width:440px}
+    #pareto{height:410px}
+    .small-chart canvas{height:220px}
+    .table-wrap{max-height:460px}
+    table{font-size:11px}
+    th,td{padding:9px 10px}
+    .info-header{align-items:flex-start;flex-wrap:wrap}
+    .info-lang{width:auto}
+    .info-title-wrap{flex-direction:column;align-items:flex-start;width:100%}
+    .back-btn{height:44px;width:100%}
+    .info-tabs{display:grid;grid-template-columns:1fr 1fr;width:100%}
+    .info-tab{height:44px;width:100%;padding:0 8px}
+    .manual-card,.ux-card{padding:16px;border-radius:14px}
+    .token-list{grid-template-columns:1fr}
+    .spec-table{font-size:11px}
+  }
+
+  @media (max-width:480px){
+    .app{padding:8px}
+    .topbar{margin-bottom:12px}
+    .brand{min-width:0}
+    .brand-row{width:100%}
+    .brand h1{font-size:17px;word-break:keep-all}
+    .brand small{font-size:10px}
+    .updated{display:none}
+    .filters{grid-template-columns:1fr;gap:9px;border-radius:14px}
+    .filters label{font-size:12px;margin-bottom:4px}
+    .kpis{grid-template-columns:1fr;gap:9px}
+    .kpi{min-height:auto}
+    .kpi .sub{font-size:11px}
+    .value{font-size:30px}
+    .card-title{font-size:14px}
+    .toolbar{margin-bottom:12px}
+    .chart-scroll-pareto{overflow-x:hidden}.chart-scroll-pareto canvas{width:100%!important;min-width:0!important;max-width:100%!important;height:420px!important}
+    .small-chart .chart-scroll canvas{min-width:400px}
+    .card-actions{flex-direction:row;align-items:center;justify-content:flex-end;width:auto;margin-left:auto}
+    .card-actions .tag{text-align:center;white-space:nowrap}
+    .download-btn{width:auto;min-width:116px;padding:0 10px}
+    .status-ico{font-size:68px}
+    .grid-main .card{padding-left:12px;padding-right:12px}
+    .chart-scroll-pareto{margin-left:0;margin-right:0;width:100%}
+
+    .manual-grid,.ux-grid{gap:10px}
+    .manual-card p,.ux-card p,.ux-card li{font-size:12px}
+    .info-tabs{gap:6px}
+    .info-tab{font-size:12px}
+  }
+
+  @media (max-width:1100px){.filters{grid-template-columns:repeat(3,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.grid-main,.grid-three{grid-template-columns:1fr}.toolbar{flex-direction:column;align-items:flex-start}.clear-btn{width:100%}.manual-grid,.ux-grid{grid-template-columns:1fr}}
+  @media (max-width:640px){.updated{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="page-view" id="dashboardView">
+  <div class="topbar">
+    <div class="brand"><div class="brand-row"><h1 data-i18n="title">工程内不良モニター(sample)</h1><button class="info-btn" id="openInfo" title="マニュアル / UI・UX設計">ℹ</button></div><small data-i18n="subtitle">Quality Monitor / Sample</small></div>
+    <div class="top-actions"><div class="lang-switch" aria-label="Language"><button type="button" class="lang-btn active" data-lang="ja">日本語</button><button type="button" class="lang-btn" data-lang="en">English</button><button type="button" class="lang-btn" data-lang="zh">中文</button></div><div class="updated" id="updated">最終更新: --:--</div></div>
+  </div>
+
+  <div class="filters">
+    <div><label data-i18n="site">拠点</label><select id="site"><option value="すべて" data-i18n="all">すべて</option><option>JP</option><option>TT</option></select></div>
+    <div><label data-i18n="lineGroup">ライン群</label><select id="line"><option value="すべて" data-i18n="all">すべて</option><option>G5</option><option>G6</option></select></div>
+    <div><label data-i18n="inspector">検査者</label><select id="inspector"><option value="すべて" data-i18n="all">すべて</option><option value="外観" data-i18n="visual">外観</option><option value="寸法" data-i18n="dimension">寸法</option></select></div>
+    <div><label data-i18n="startDate">開始日</label><input id="from" type="date"></div>
+    <div><label data-i18n="endDate">終了日</label><input id="to" type="date"></div>
+    <div><label>&nbsp;</label><button id="searchBtn" data-i18n="search">検索</button></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="chips" id="activeFilters"><span class="chip-muted">チャートをクリックすると連動フィルタがかかります</span></div>
+    <button class="clear-btn" id="clearChartFilters" data-i18n="clearChart">チャート絞り込み解除</button>
+  </div>
+
+  <div class="kpis">
+    <div class="card kpi"><div class="label" data-i18n="goodCount">良品数</div><div class="value blue" id="okCount">-<span class="unit">台</span></div><div class="sub" data-i18n="topFilterOnly">上部の検索条件のみ反映</div></div>
+    <div class="card kpi"><div class="label" data-i18n="defectCount">不良数</div><div class="value" id="ngCount">-<span class="unit">台</span></div><div class="sub" data-i18n="topFilterOnly">上部の検索条件のみ反映</div></div>
+    <div class="card kpi"><div class="label" data-i18n="defectRate">不良率</div><div class="value red" id="ngRate">-<span class="unit">%</span></div><div class="sub" data-i18n="kpiNoRelation">チャート選択とは連動しません</div></div>
+    <div class="card kpi"><div class="label" data-i18n="rating">現在の評価</div><div class="status"><div class="status-ico" id="statusIco">☁</div><div class="status-text"><b id="statusText">WARNING</b><span id="statusSub">改善が必要な水準です</span></div></div></div>
+  </div>
+
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-head"><div class="card-title" data-i18n="paretoTitle">不良内容 パレート図</div><div class="tag" data-i18n="paretoTag">累積80%を重点管理</div></div>
+      <div class="chart-scroll chart-scroll-pareto"><canvas id="pareto"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-three">
+    <div class="card small-chart"><div class="card-head"><div class="card-title" data-i18n="partDefects">品番別 不良数</div><div class="tag" data-i18n="clickLink">クリックで連動</div></div><div class="chart-scroll"><canvas id="partChart"></canvas></div></div>
+    <div class="card small-chart"><div class="card-head"><div class="card-title" data-i18n="lineDefects">ライン別 不良数</div><div class="tag" data-i18n="clickLink">クリックで連動</div></div><div class="chart-scroll"><canvas id="lineChart"></canvas></div></div>
+    <div class="card small-chart"><div class="card-head"><div class="card-title" data-i18n="finishDefects">仕上別 不良数</div><div class="tag" data-i18n="clickLink">クリックで連動</div></div><div class="chart-scroll"><canvas id="finishChart"></canvas></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title" data-i18n="detailTitle">不良明細</div>
+      <div class="card-actions">
+        <div class="tag" id="detailCount">全0件</div>
+        <button class="download-btn" id="downloadCsv" data-i18n="downloadCsv">CSVダウンロード</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th data-i18n="dateTime">日時</th><th data-i18n="site">拠点</th><th data-i18n="line">ライン</th><th data-i18n="part">品番</th><th data-i18n="finish">仕上</th><th data-i18n="defectContent">不良内容</th><th data-i18n="inspector">検査者</th><th data-i18n="judgment">判定</th></tr></thead><tbody id="tbody"></tbody></table></div>
+  </div>
+</div>
+
+<div class="info-view" id="infoView">
+  <div class="info-header">
+    <div class="info-title-wrap">
+      <button class="back-btn" id="backDashboard" data-i18n="back">← ダッシュボードへ戻る</button>
+      <div>
+        <h1 style="margin:0;font-size:22px" data-i18n="title">工程内不良モニター(sample)</h1>
+        <div style="color:var(--muted);font-size:12px;margin-top:4px">Manual / UI・UX Design</div>
+      </div>
+    </div>
+    <div class="lang-switch info-lang" aria-label="Language"><button type="button" class="lang-btn active" data-lang="ja">日本語</button><button type="button" class="lang-btn" data-lang="en">English</button><button type="button" class="lang-btn" data-lang="zh">中文</button></div>
+  </div>
+
+  <div class="info-tabs">
+    <button class="info-tab active" data-tab="manualPanel" data-i18n="manualTab">操作マニュアル</button>
+    <button class="info-tab" data-tab="uxPanel" data-i18n="uxTab">UI / UX 設計</button>
+  </div>
+
+  <section class="info-panel active" id="manualPanel">
+    <div class="manual-grid">
+      <div class="manual-card">
+        <h3>1. 検索条件を指定</h3>
+        <div class="manual-step"><div class="step-num">1</div><p>拠点・ライン群・検査者・開始日・終了日を指定します。初期表示は開始日・終了日ともに「昨日」です。</p></div>
+        <div class="manual-step"><div class="step-num">2</div><p>「検索」を押すと、最上段KPIと全チャートが指定条件で再集計されます。</p></div>
+      </div>
+      <div class="manual-card">
+        <h3>2. KPIの見方</h3>
+        <p>最上段の「良品数・不良数・不良率・現在の評価」は、上部検索条件のみを反映します。チャートクリックによる掘り下げ条件では変化しません。</p>
+        <div class="legend-row"><span class="legend-dot" style="background:#e60012"></span>☀ 0～1.9999%：GOOD</div>
+        <div class="legend-row"><span class="legend-dot" style="background:#6b7280"></span>☁ 2～4.9999%：WARNING</div>
+        <div class="legend-row"><span class="legend-dot" style="background:#2563eb"></span>☂ 5%以上：BAD</div>
+      </div>
+      <div class="manual-card">
+        <h3>3. パレート図の見方</h3>
+        <p>不良内容を件数の多い順に表示します。赤い棒は累積80%に到達するまでの重点不良です。赤い折れ線は累積比率、オレンジ破線は80%ラインです。</p>
+        <div class="note-box">重点項目は件数や検索条件に応じて自動で変わります。</div>
+      </div>
+      <div class="manual-card">
+        <h3>4. チャート連動</h3>
+        <p>不良内容・品番・ライン・仕上の棒グラフをクリックすると、ほかのチャートと不良明細が連動して絞り込まれます。同じ棒をもう一度クリックすると、その条件だけ解除されます。</p>
+        <div class="note-box">上部の「チャート絞り込み解除」で、チャート選択を一括解除できます。</div>
+      </div>
+      <div class="manual-card">
+        <h3>5. 不良明細</h3>
+        <p>指定期間内の不良データを全件表示します。チャートで絞り込んだ場合は、その条件に該当する明細だけが表示されます。</p>
+      </div>
+      <div class="manual-card">
+        <h3>6. CSVダウンロード</h3>
+        <p>「CSVダウンロード」を押すと、現在表示中の不良明細をCSVで保存できます。検索条件・チャート選択の両方を反映したデータが出力対象です。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-panel" id="uxPanel">
+    <div class="ux-grid">
+      <div class="ux-card">
+        <h3>UI / UX コンセプト</h3>
+        <p>「異常の発見 → 原因の絞り込み → 明細確認 → データ出力」を1画面で完結させることを目的とした品質分析ダッシュボードです。</p>
+        <ul>
+          <li><b>視認性：</b> 白背景＋淡いグレーをベースに、異常・重点箇所だけ赤で強調。</li>
+          <li><b>一貫性：</b> すべての分析カードを同じ角丸・余白・タイトル階層で統一。</li>
+          <li><b>直接操作：</b> グラフそのものをフィルターとして使えるクロスフィルタ型UI。</li>
+          <li><b>認知負荷低減：</b> KPIは全体状態、チャートは掘り下げ分析という役割を分離。</li>
+          <li><b>復帰性：</b> 選択条件を可視化し、一括解除できるため迷子になりにくい。</li>
+        </ul>
+      </div>
+      <div class="ux-card">
+        <h3>デザイントークン</h3>
+        <p>配色はデンソーのコーポレートイメージを基準に設計し、社内システムとしての視覚的な統一感を確保しています。強調色と通常色の役割を明確に分けることで、ブランド性と情報判読性の両立を図っています。</p>
+        <div class="token-list">
+          <div class="token"><div class="swatch" style="background:#f4f7fb"></div><b>Background</b><span>#F4F7FB</span></div>
+          <div class="token"><div class="swatch" style="background:#ffffff"></div><b>Card</b><span>#FFFFFF</span></div>
+          <div class="token"><div class="swatch" style="background:#e60012"></div><b>DENSO Red</b><span>#E60012</span><p class="token-note">デンソーレッドを採用。重点不良・警告・注目情報に用いることで、企業ブランドとの視覚的な一貫性を保ちながら、重要情報を直感的に認識できる設計としています。</p></div>
+          <div class="token"><div class="swatch" style="background:#16a34a"></div><b>Action Green</b><span>#16A34A</span><p class="token-note">検索・CSVダウンロードなど、ユーザーが能動的に実行するアクションに使用。初期案では赤色も検討しましたが、グラフの強調色と競合して操作ボタンがデータ表現の一部に見えやすい傾向があったため、A/B比較の結果グリーンを採用しました。データを示す色と、操作を促す色を明確に分離することで、視認性と操作性の両立を図っています。</p></div>
+          <div class="token"><div class="swatch" style="background:#91bee8"></div><b>Crafting Blue</b><span>#91BEE8</span><p class="token-note">デンソーのCrafting Blueを採用。通常データや比較対象に使用し、デンソーレッドとのコントラストで情報の優先度を明確化。社内ツールとしての統一感と親和性を高めています。</p></div>
+          <div class="token"><div class="swatch" style="background:#1f2937"></div><b>Primary text</b><span>#1F2937</span></div>
+        </div>
+      </div>
+      <div class="ux-card">
+        <h3>コンポーネント設計</h3>
+        <table class="spec-table">
+          <thead><tr><th>要素</th><th>役割</th><th>設計意図</th></tr></thead>
+          <tbody>
+            <tr><td>KPIカード</td><td>全体状態の把握</td><td>チャート連動から切り離し、基準値として固定。</td></tr>
+            <tr><td>パレート図</td><td>重点不良の特定</td><td>累積80%を赤で明示し、優先順位を瞬時に判断。</td></tr>
+            <tr><td>品番 / ライン / 仕上</td><td>原因の切り口</td><td>クリック操作で他チャートと明細をクロスフィルタ。</td></tr>
+            <tr><td>選択チップ</td><td>現在条件の可視化</td><td>「今どこまで絞っているか」を常時把握。</td></tr>
+            <tr><td>不良明細</td><td>事実確認</td><td>集計結果から実データへ自然にドリルダウン。</td></tr>
+            <tr><td>CSV</td><td>二次利用</td><td>会議資料・Excel分析へそのまま持ち出せる。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ux-card">
+        <h3>操作フロー</h3>
+        <p><b>① 条件検索</b><br>対象範囲を決める</p>
+        <p><b>② KPI確認</b><br>全体の不良率と評価を見る</p>
+        <p><b>③ パレート図確認</b><br>重点不良を選ぶ</p>
+        <p><b>④ クロスフィルタ</b><br>品番・ライン・仕上で原因を掘る</p>
+        <p><b>⑤ 明細確認 / CSV</b><br>対象データを確認・出力する</p>
+      </div>
+    </div>
+  </section>
+</div>
+</div>
+<script>
+let currentLang = 'ja';
+const I18N = {
+  ja:{title:'工程内不良モニター(sample)',subtitle:'Quality Monitor / Sample',site:'拠点',lineGroup:'ライン群',inspector:'検査者',startDate:'開始日',endDate:'終了日',search:'検索',all:'すべて',visual:'外観',dimension:'寸法',clearChart:'チャート絞り込み解除',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'現在の評価',topFilterOnly:'上部の検索条件のみ反映',kpiNoRelation:'チャート選択とは連動しません',paretoTitle:'不良内容 パレート図',paretoTag:'累積80%を重点管理',partDefects:'品番別 不良数',lineDefects:'ライン別 不良数',finishDefects:'仕上別 不良数',clickLink:'クリックで連動',detailTitle:'不良明細',downloadCsv:'CSVダウンロード',back:'← ダッシュボードへ戻る',manualTab:'操作マニュアル',uxTab:'UI / UX 設計',dateTime:'日時',line:'ライン',part:'品番',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'チャートをクリックすると連動フィルタがかかります',detailCount:n=>`全${n.toLocaleString('ja-JP')}件`,updated:t=>`最終更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'目標水準をクリアしています',warningSub:'改善が必要な水準です',badSub:'優先改善が必要な水準です',noData:'対象データがありません',csvNoData:'ダウンロード対象の不良明細がありません。',csvName:'不良明細',unit:'台',defectChip:'不良内容',partChip:'品番',lineChip:'ライン',finishChip:'仕上'},
+  en:{title:'In-Process Defect Monitor (Sample)',subtitle:'Quality Monitor / Sample',site:'Site',lineGroup:'Line group',inspector:'Inspector',startDate:'Start date',endDate:'End date',search:'Search',all:'All',visual:'Visual',dimension:'Dimension',clearChart:'Clear chart filters',goodCount:'Good units',defectCount:'Defects',defectRate:'Defect rate',rating:'Rating',topFilterOnly:'Reflects top search conditions only',kpiNoRelation:'Not affected by chart selections',paretoTitle:'Defect Pareto Chart',paretoTag:'Focus on cumulative 80%',partDefects:'Defects by Part No.',lineDefects:'Defects by Line',finishDefects:'Defects by Finish',clickLink:'Click to cross-filter',detailTitle:'Defect details',downloadCsv:'Download CSV',back:'← Back to monitor',manualTab:'User Manual',uxTab:'UI / UX Design',dateTime:'Date / Time',line:'Line',part:'Part No.',finish:'Finish',defectContent:'Defect',judgment:'Result',filterHint:'Click a chart bar to apply a cross-filter',detailCount:n=>`${n.toLocaleString('en-US')} records`,updated:t=>`Updated: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'Target level achieved',warningSub:'Improvement is recommended',badSub:'Priority improvement required',noData:'No matching data',csvNoData:'No defect details are available to download.',csvName:'defect_details',unit:'units',defectChip:'Defect',partChip:'Part',lineChip:'Line',finishChip:'Finish'},
+  zh:{title:'制程不良监控器（Sample）',subtitle:'Quality Monitor / Sample',site:'据点',lineGroup:'产线组',inspector:'检验类型',startDate:'开始日期',endDate:'结束日期',search:'查询',all:'全部',visual:'外观',dimension:'尺寸',clearChart:'清除图表筛选',goodCount:'良品数',defectCount:'不良数',defectRate:'不良率',rating:'当前评价',topFilterOnly:'仅反映上方查询条件',kpiNoRelation:'不随图表选择联动',paretoTitle:'不良内容 帕累托图',paretoTag:'重点管理累计80%',partDefects:'按品号不良数',lineDefects:'按产线不良数',finishDefects:'按仕上不良数',clickLink:'点击联动筛选',detailTitle:'不良明细',downloadCsv:'下载 CSV',back:'← 返回监控器',manualTab:'操作手册',uxTab:'UI / UX 设计',dateTime:'日期时间',line:'产线',part:'品号',finish:'仕上',defectContent:'不良内容',judgment:'判定',filterHint:'点击图表柱形可进行联动筛选',detailCount:n=>`共 ${n.toLocaleString('zh-CN')} 条`,updated:t=>`最后更新: ${t}`,good:'GOOD',warning:'WARNING',bad:'BAD',goodSub:'已达到目标水平',warningSub:'建议改善',badSub:'需要优先改善',noData:'没有符合条件的数据',csvNoData:'没有可下载的不良明细。',csvName:'不良明细',unit:'台',defectChip:'不良内容',partChip:'品号',lineChip:'产线',finishChip:'仕上'}
+};
+const DEFECT_LABELS={
+  'ろう付け不良':{ja:'ろう付け不良',en:'Brazing defect',zh:'钎焊不良'},
+  'フィン倒れ':{ja:'フィン倒れ',en:'Bent fin',zh:'翅片倒伏'},
+  'キズ・打痕':{ja:'キズ・打痕',en:'Scratch / dent',zh:'划伤・压痕'},
+  'ブラケットズレ':{ja:'ブラケットズレ',en:'Bracket misalignment',zh:'支架偏移'},
+  '変色':{ja:'変色',en:'Discoloration',zh:'变色'},
+  '寸法NG':{ja:'寸法NG',en:'Dimension NG',zh:'尺寸NG'},
+  '異物':{ja:'異物',en:'Foreign material',zh:'异物'},
+  'かしめ不良':{ja:'かしめ不良',en:'Crimp defect',zh:'铆接不良'},
+  'その他':{ja:'その他',en:'Other',zh:'其他'}
+};
+const AREA_LABELS={外観:{ja:'外観',en:'Visual',zh:'外观'},寸法:{ja:'寸法',en:'Dimension',zh:'尺寸'},ろう付け:{ja:'ろう付け',en:'Brazing',zh:'钎焊'},組付け:{ja:'組付け',en:'Assembly',zh:'组装'}};
+function t(key){ const v=I18N[currentLang]?.[key] ?? I18N.ja[key] ?? key; return typeof v==='function'?v:v; }
+function defectLabel(key){ return DEFECT_LABELS[key]?.[currentLang] || key; }
+function areaLabel(key){ return AREA_LABELS[key]?.[currentLang] || key; }
+function inspectorLabel(key){ return key==='外観'?t('visual'):key==='寸法'?t('dimension'):key; }
+function applyStaticLanguage(){
+  document.documentElement.lang=currentLang==='zh'?'zh-CN':currentLang;
+  document.title=t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const key=el.dataset.i18n; if(I18N[currentLang]?.[key]!==undefined) el.textContent=t(key); });
+  document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.lang===currentLang));
+  renderInfoContent();
+}
+function setLanguage(lang){ currentLang=lang; applyStaticLanguage(); renderAll(); }
+function renderInfoContent(){
+  const m=document.getElementById('manualPanel'), u=document.getElementById('uxPanel');
+  if(!m||!u)return;
+  const html={
+    ja:{manual:`<div class="manual-grid"><div class="manual-card"><h3>1. 検索条件を指定</h3><p>拠点・ライン群・検査者・開始日・終了日を指定します。初期表示は開始日・終了日ともに「昨日」です。「検索」を押すとKPIと全チャートを再集計します。</p></div><div class="manual-card"><h3>2. KPIの見方</h3><p>良品数・不良数・不良率・現在の評価は上部検索条件のみ反映し、チャート選択では変化しません。</p><div class="legend-row">☀ 0～1.9999%：GOOD</div><div class="legend-row">☁ 2～4.9999%：WARNING</div><div class="legend-row">☂ 5%以上：BAD</div></div><div class="manual-card"><h3>3. パレート図</h3><p>不良内容を件数順に表示します。赤い棒は累積80%に到達するまでの重点不良です。赤線は累積比率、オレンジ破線は80%ラインです。</p></div><div class="manual-card"><h3>4. チャート連動</h3><p>不良内容・品番・ライン・仕上の棒をクリックすると、他のチャートと不良明細が連動します。同じ棒を再クリックすると解除します。</p></div><div class="manual-card"><h3>5. 不良明細</h3><p>指定期間内の不良データを全件表示します。現在のチャート絞り込みも反映されます。</p></div><div class="manual-card"><h3>6. CSVダウンロード</h3><p>現在表示中の不良明細をCSVで保存します。検索条件とチャート選択の両方を反映します。</p></div></div>`,ux:`<div class="ux-grid"><div class="ux-card"><h3>UI / UX コンセプト</h3><p>「異常の発見 → 原因の絞り込み → 明細確認 → データ出力」を1画面で完結させる品質分析UIです。</p><ul><li><b>視認性：</b>重点箇所のみ赤で強調。</li><li><b>直接操作：</b>グラフ自体をフィルターとして利用。</li><li><b>レスポンシブ：</b>PC・タブレット・スマートフォンで情報階層を維持。</li></ul></div><div class="ux-card"><h3>デザイントークン</h3><div class="token-list"><div class="token"><div class="swatch" style="background:#e60012"></div><b>DENSO Red</b><span>#E60012</span><p class="token-note">重点不良・警告に使用し、ブランドとの視覚的一貫性を確保。</p></div><div class="token"><div class="swatch" style="background:#91bee8"></div><b>Crafting Blue</b><span>#91BEE8</span><p class="token-note">通常データに使用し、DENSO Redとの情報優先度を明確化。</p></div><div class="token"><div class="swatch" style="background:#16a34a"></div><b>Action Green</b><span>#16A34A</span><p class="token-note">検索・CSVなど実行アクションに使用。赤ボタン案とのA/B比較で、グラフの強調色との誤認が少ないグリーンを採用。</p></div></div></div></div>`},
+    en:{manual:`<div class="manual-grid"><div class="manual-card"><h3>1. Set search conditions</h3><p>Select site, line group, inspector, start date, and end date. Both dates default to yesterday. Press Search to recalculate the KPIs and charts.</p></div><div class="manual-card"><h3>2. KPI overview</h3><p>Good units, defects, defect rate, and rating reflect only the top search conditions and do not change with chart selections.</p><div class="legend-row">☀ 0–1.9999%: GOOD</div><div class="legend-row">☁ 2–4.9999%: WARNING</div><div class="legend-row">☂ 5% or more: BAD</div></div><div class="manual-card"><h3>3. Pareto chart</h3><p>Defects are ordered by count. Red bars represent priority defects up to the cumulative 80% threshold.</p></div><div class="manual-card"><h3>4. Cross-filtering</h3><p>Click a defect, part, line, or finish bar to cross-filter the other charts and detail table. Click the same bar again to clear it.</p></div><div class="manual-card"><h3>5. Defect details</h3><p>All defect records in the selected period are shown and respond to chart filters.</p></div><div class="manual-card"><h3>6. CSV download</h3><p>Downloads the currently displayed defect details, including search and chart filters.</p></div></div>`,ux:`<div class="ux-grid"><div class="ux-card"><h3>UI / UX Concept</h3><p>A one-screen quality analysis flow: detect abnormality → narrow the cause → inspect details → export data.</p><ul><li><b>Visibility:</b> red is reserved for priority information.</li><li><b>Direct manipulation:</b> charts themselves act as filters.</li><li><b>Responsive:</b> the information hierarchy is preserved on desktop, tablet, and mobile.</li></ul></div><div class="ux-card"><h3>Design tokens</h3><div class="token-list"><div class="token"><div class="swatch" style="background:#e60012"></div><b>DENSO Red</b><span>#E60012</span><p class="token-note">Used for priority defects and warnings to maintain visual brand consistency.</p></div><div class="token"><div class="swatch" style="background:#91bee8"></div><b>Crafting Blue</b><span>#91BEE8</span><p class="token-note">Used for normal data, creating a clear hierarchy against DENSO Red.</p></div><div class="token"><div class="swatch" style="background:#16a34a"></div><b>Action Green</b><span>#16A34A</span><p class="token-note">Used for actions such as Search and CSV. A/B comparison with red buttons showed green was less likely to be mistaken for chart data.</p></div></div></div></div>`},
+    zh:{manual:`<div class="manual-grid"><div class="manual-card"><h3>1. 设置查询条件</h3><p>选择据点、产线组、检验类型、开始日期和结束日期。默认日期均为昨天。点击“查询”后重新计算KPI和全部图表。</p></div><div class="manual-card"><h3>2. KPI查看方法</h3><p>良品数、不良数、不良率和当前评价仅反映上方查询条件，不随图表选择变化。</p><div class="legend-row">☀ 0–1.9999%：GOOD</div><div class="legend-row">☁ 2–4.9999%：WARNING</div><div class="legend-row">☂ 5%以上：BAD</div></div><div class="manual-card"><h3>3. 帕累托图</h3><p>按不良件数从高到低显示。红色柱表示累计达到80%之前的重点不良。</p></div><div class="manual-card"><h3>4. 图表联动</h3><p>点击不良内容、品号、产线或仕上的柱形后，其他图表和明细会联动筛选。再次点击同一柱形可解除。</p></div><div class="manual-card"><h3>5. 不良明细</h3><p>显示所选期间内的全部不良数据，并反映当前图表筛选。</p></div><div class="manual-card"><h3>6. CSV下载</h3><p>下载当前显示的不良明细，同时反映查询条件和图表筛选。</p></div></div>`,ux:`<div class="ux-grid"><div class="ux-card"><h3>UI / UX 概念</h3><p>在一个画面内完成“发现异常 → 缩小原因 → 查看明细 → 导出数据”的品质分析流程。</p><ul><li><b>可视性：</b>仅用红色强调重点信息。</li><li><b>直接操作：</b>图表本身即可作为筛选器。</li><li><b>响应式：</b>在PC、平板和手机上保持信息层级。</li></ul></div><div class="ux-card"><h3>设计色彩</h3><div class="token-list"><div class="token"><div class="swatch" style="background:#e60012"></div><b>DENSO Red</b><span>#E60012</span><p class="token-note">用于重点不良和警告，保持品牌视觉一致性。</p></div><div class="token"><div class="swatch" style="background:#91bee8"></div><b>Crafting Blue</b><span>#91BEE8</span><p class="token-note">用于普通数据，与DENSO Red形成明确的信息优先级。</p></div><div class="token"><div class="swatch" style="background:#16a34a"></div><b>Action Green</b><span>#16A34A</span><p class="token-note">用于查询、CSV等操作。与红色按钮进行A/B比较后，绿色更不容易与图表数据混淆。</p></div></div></div></div>`}
+  };
+  m.innerHTML=html[currentLang].manual; u.innerHTML=html[currentLang].ux;
+}
+
+const SAMPLE_START = '2026-08-01';
+const SAMPLE_END   = '2026-09-02';
+const META = {
+  sites:[{key:'JP',weight:0.78},{key:'TT',weight:0.22}],
+  lines:[
+    {key:'G5-1',group:'G5',weight:0.24},
+    {key:'G5-2',group:'G5',weight:0.18},
+    {key:'G5-3',group:'G5',weight:0.14},
+    {key:'G6-1',group:'G6',weight:0.19},
+    {key:'G6-2',group:'G6',weight:0.15},
+    {key:'G6-3',group:'G6',weight:0.10}
+  ],
+  parts:[
+    {key:'0230',weight:0.16},{key:'0240',weight:0.25},{key:'0250',weight:0.18},
+    {key:'0270',weight:0.13},{key:'0340',weight:0.17},{key:'0350',weight:0.11}
+  ],
+  finishes:[
+    {key:'A',weight:0.32},{key:'B',weight:0.16},{key:'C',weight:0.21},{key:'D',weight:0.18},{key:'H',weight:0.13}
+  ],
+  defects:[
+    {key:'ろう付け不良',weight:0.28,areas:['ろう付け','外観']},
+    {key:'フィン倒れ',weight:0.17,areas:['外観']},
+    {key:'キズ・打痕',weight:0.14,areas:['外観']},
+    {key:'ブラケットズレ',weight:0.11,areas:['組付け','外観']},
+    {key:'変色',weight:0.09,areas:['外観']},
+    {key:'寸法NG',weight:0.08,areas:['寸法']},
+    {key:'異物',weight:0.06,areas:['外観']},
+    {key:'かしめ不良',weight:0.04,areas:['組付け']},
+    {key:'その他',weight:0.03,areas:['外観','寸法','組付け']}
+  ]
+};
+
+const productionCells = [];
+const defectRecords = [];
+const selection = { defect:null, part:null, line:null, finish:null };
+const chartState = { pareto:{hits:[]}, partChart:{hits:[]}, lineChart:{hits:[]}, finishChart:{hits:[]} };
+
+function seededRandom(seed){
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return () => (s = s * 16807 % 2147483647) / 2147483647;
+}
+const rand = seededRandom(202609021837);
+function rnd(min,max){ return Math.floor(rand()*(max-min+1))+min; }
+function fmt(n){ return n.toLocaleString(currentLang==='en'?'en-US':currentLang==='zh'?'zh-CN':'ja-JP'); }
+function toYMD(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function parseYMD(s){ return new Date(s+'T00:00:00'); }
+function dateRange(start,end){
+  const out=[]; let d=parseYMD(start), last=parseYMD(end);
+  while(d<=last){ out.push(toYMD(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+function weightedPick(items, accessor){
+  const total = items.reduce((s,item)=>s+accessor(item),0);
+  let roll = rand()*total;
+  for(const item of items){ roll -= accessor(item); if(roll<=0) return item; }
+  return items[items.length-1];
+}
+function allocateInts(total, items, accessor, jitter=0.0){
+  const raw = items.map(item => Math.max(0.0001, accessor(item) * (1 + (rand()*2-1)*jitter)));
+  const rawTotal = raw.reduce((a,b)=>a+b,0);
+  const base = raw.map(v => Math.floor(total * v / rawTotal));
+  let diff = total - base.reduce((a,b)=>a+b,0);
+  while(diff > 0){ base[diff % base.length]++; diff--; }
+  return items.map((item,i)=>({item, value:base[i]}));
+}
+function setDefaultDates(){
+  const y = new Date();
+  y.setDate(y.getDate()-1);
+  const yesterday = toYMD(y);
+  document.getElementById('from').value = yesterday;
+  document.getElementById('to').value = yesterday;
+}
+
+function generateSampleData(){
+  let defectId = 1;
+  for(const date of dateRange(SAMPLE_START, SAMPLE_END)){
+    const goodTarget = rnd(9800,10450); // 約10000/日
+    const ngTarget = rnd(180,225);      // 約200/日
+
+    const bySite = allocateInts(goodTarget, META.sites, x=>x.weight, 0.06);
+    for(const siteBlock of bySite){
+      const site = siteBlock.item.key;
+      const byLine = allocateInts(siteBlock.value, META.lines, x=>x.weight, 0.09);
+      for(const lineBlock of byLine){
+        const lineMeta = lineBlock.item;
+        const byPart = allocateInts(lineBlock.value, META.parts, x=>x.weight, 0.12);
+        for(const partBlock of byPart){
+          const byFinish = allocateInts(partBlock.value, META.finishes, x=>x.weight, 0.10);
+          for(const finishBlock of byFinish){
+            productionCells.push({
+              date, site,
+              line: lineMeta.key,
+              lineGroup: lineMeta.group,
+              part: partBlock.item.key,
+              finish: finishBlock.item.key,
+              good: finishBlock.value,
+              ng: 0
+            });
+          }
+        }
+      }
+    }
+
+    const dayCells = productionCells.filter(c => c.date === date);
+    for(let i=0;i<ngTarget;i++){
+      const cell = weightedPick(dayCells, c => Math.max(1, c.good));
+      cell.ng += 1;
+
+      let defect = weightedPick(META.defects, d => d.weight);
+      if(cell.finish === 'C' && rand() < 0.24) defect = META.defects.find(d=>d.key==='ろう付け不良');
+      if(cell.finish === 'B' && rand() < 0.18) defect = META.defects.find(d=>d.key==='寸法NG');
+      if(cell.part === '0240' && rand() < 0.16) defect = META.defects.find(d=>d.key==='フィン倒れ');
+      if(cell.part === '0230' && rand() < 0.14) defect = META.defects.find(d=>d.key==='キズ・打痕');
+
+      const area = defect.areas[rnd(0, defect.areas.length-1)];
+      const inspector = defect.key === '寸法NG' ? (rand()<0.7 ? '寸法' : '外観') : (rand()<0.78 ? '外観' : '寸法');
+      const hour = String(rnd(8,22)).padStart(2,'0');
+      const min = String(rnd(0,59)).padStart(2,'0');
+      const sec = String(rnd(0,59)).padStart(2,'0');
+
+      defectRecords.push({
+        id:defectId++,
+        date,
+        datetime:`${date} ${hour}:${min}:${sec}`,
+        site:cell.site,
+        line:cell.line,
+        lineGroup:cell.lineGroup,
+        part:cell.part,
+        finish:cell.finish,
+        defect:defect.key,
+        area,
+        inspector
+      });
+    }
+  }
+}
+
+function formFilters(){
+  return {
+    site:document.getElementById('site').value,
+    lineGroup:document.getElementById('line').value,
+    inspector:document.getElementById('inspector').value,
+    from:document.getElementById('from').value,
+    to:document.getElementById('to').value
+  };
+}
+function inDateRange(date, from, to){
+  if(from && date < from) return false;
+  if(to && date > to) return false;
+  return true;
+}
+function passesCommon(item, excludeDim, includeInspector){
+  const f = formFilters();
+  if(!inDateRange(item.date, f.from, f.to)) return false;
+  if(f.site !== 'すべて' && item.site !== f.site) return false;
+  if(f.lineGroup !== 'すべて' && item.lineGroup !== f.lineGroup) return false;
+  if(includeInspector && f.inspector !== 'すべて' && item.inspector !== f.inspector) return false;
+
+  if(selection.defect && excludeDim !== 'defect' && item.defect !== selection.defect) return false;
+  if(selection.part && excludeDim !== 'part' && item.part !== selection.part) return false;
+  if(selection.line && excludeDim !== 'line' && item.line !== selection.line) return false;
+  if(selection.finish && excludeDim !== 'finish' && item.finish !== selection.finish) return false;
+  return true;
+}
+function filteredRecords(excludeDim=null){ return defectRecords.filter(r => passesCommon(r, excludeDim, true)); }
+function filteredCells(excludeDim=null){ return productionCells.filter(c => passesCommon(c, excludeDim, false)); }
+function currentGood(){ return filteredCells(null).reduce((s,c)=>s+c.good,0); }
+function currentNg(){ return filteredRecords(null).length; }
+function currentTotalUnits(){ return filteredCells(null).reduce((s,c)=>s+c.good+c.ng,0); }
+
+function groupCount(records, field, orderedKeys){
+  const map = new Map(orderedKeys.map(k=>[k,0]));
+  records.forEach(r=>map.set(r[field], (map.get(r[field])||0)+1));
+  return Array.from(map, ([key,value])=>({key,label:key,value}));
+}
+function groupRate(records, cells, field, orderedKeys){
+  const ngMap = new Map(orderedKeys.map(k=>[k,0]));
+  const totalMap = new Map(orderedKeys.map(k=>[k,0]));
+  records.forEach(r=>ngMap.set(r[field], (ngMap.get(r[field])||0)+1));
+  cells.forEach(c=>totalMap.set(c[field], (totalMap.get(c[field])||0) + c.good + c.ng));
+  return orderedKeys.map(key=>{
+    const ng = ngMap.get(key)||0;
+    const total = totalMap.get(key)||0;
+    const value = total ? (ng / total * 100) : 0;
+    return {key, label:key, value, ng, total};
+  });
+}
+function passesTopFilters(item, includeInspector){
+  const f = formFilters();
+  if(!inDateRange(item.date, f.from, f.to)) return false;
+  if(f.site !== 'すべて' && item.site !== f.site) return false;
+  if(f.lineGroup !== 'すべて' && item.lineGroup !== f.lineGroup) return false;
+  if(includeInspector && f.inspector !== 'すべて' && item.inspector !== f.inspector) return false;
+  return true;
+}
+function buildMetrics(){
+  // 最上段KPIはチャート選択とは連動させない。上部の検索条件だけ反映する。
+  const cells = productionCells.filter(c => passesTopFilters(c, false));
+  const records = defectRecords.filter(r => passesTopFilters(r, true));
+  const good = cells.reduce((s,c)=>s+c.good,0);
+  const ng = records.length;
+  const total = cells.reduce((s,c)=>s+c.good+c.ng,0);
+  const rate = total ? (ng/total*100) : 0;
+  return {good, ng, total, rate};
+}
+function updateHeaderChips(){
+  const root = document.getElementById('activeFilters');
+  const chips = [];
+  if(selection.defect) chips.push(`<span class="chip">${t('defectChip')}: ${defectLabel(selection.defect)}</span>`);
+  if(selection.part) chips.push(`<span class="chip">${t('partChip')}: ${selection.part}</span>`);
+  if(selection.line) chips.push(`<span class="chip">${t('lineChip')}: ${selection.line}</span>`);
+  if(selection.finish) chips.push(`<span class="chip">${t('finishChip')}: ${selection.finish}</span>`);
+  root.innerHTML = chips.length ? chips.join('') : `<span class="chip-muted">${t('filterHint')}</span>`;
+}
+function updateKpis(){
+  const m = buildMetrics();
+  document.getElementById('okCount').innerHTML = `${fmt(m.good)}<span class="unit">${t('unit')}</span>`;
+  document.getElementById('ngCount').innerHTML = `${fmt(m.ng)}<span class="unit">${t('unit')}</span>`;
+  document.getElementById('ngRate').innerHTML = `${m.rate.toFixed(2)}<span class="unit">%</span>`;
+
+  let ico='☀︎', txt=t('good'), sub=t('goodSub'), cls='good';
+  if(m.rate >= 5){ ico='☂︎'; txt=t('bad'); sub=t('badSub'); cls='bad'; }
+  else if(m.rate >= 2){ ico='☁︎'; txt=t('warning'); sub=t('warningSub'); cls='warning'; }
+  const statusIco = document.getElementById('statusIco');
+  statusIco.textContent = ico;
+  statusIco.className = 'status-ico ' + cls;
+  document.getElementById('statusText').textContent = txt;
+  document.getElementById('statusSub').textContent = sub;
+  document.getElementById('updated').textContent = t('updated')(new Date().toLocaleTimeString(currentLang==='en'?'en-US':currentLang==='zh'?'zh-CN':'ja-JP',{hour:'2-digit',minute:'2-digit'}));
+}
+
+function setupCanvas(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  return {ctx,w:rect.width,h:rect.height};
+}
+function drawGrid(ctx,w,h,L,B,T=18,R=12,rows=4){
+  ctx.strokeStyle='#e8edf2'; ctx.lineWidth=1;
+  for(let i=0;i<=rows;i++){
+    const y = T + ((h-B-T) / rows) * i;
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(w-R,y); ctx.stroke();
+  }
+}
+function clearChart(id){ chartState[id].hits = []; }
+function colorForBar(selected, key){
+  if(selected === key) return '#e60012';
+  if(selected) return '#9fc0df';
+  return '#ef3349';
+}
+function colorForAlt(selected, key){
+  if(selected === key) return '#e60012';
+  if(selected) return '#a7c5e2';
+  return '#91bee8';
+}
+
+function renderPareto(){
+  const data = groupCount(filteredRecords('defect'), 'defect', META.defects.map(d=>d.key)).sort((a,b)=>b.value-a.value);
+  const {ctx,w,h} = setupCanvas(document.getElementById('pareto'));
+  clearChart('pareto');
+  const mobile=window.innerWidth<=768; const L=mobile?22:52,B=mobile?132:120,T=mobile?22:18,R=mobile?8:18, plotW=w-L-R, plotH=h-B-T, gap=plotW/data.length, bw=Math.min(86, mobile?Math.max(18,gap*0.66):gap*0.58);
+  drawGrid(ctx,w,h,L,B,T,R,4);
+  const max = Math.max(1, ...data.map(d=>d.value));
+  const total = Math.max(1, data.reduce((s,d)=>s+d.value,0));
+
+  // 累積80%に到達する項目までを重点項目（赤）にする。
+  // 80%をまたぐ最後の1項目も赤に含める。
+  let running = 0;
+  let redThroughIndex = data.length - 1;
+  for(let i=0;i<data.length;i++){
+    running += data[i].value;
+    if(running / total >= 0.8){ redThroughIndex = i; break; }
+  }
+
+  let cum = 0;
+  data.forEach((d,i)=>{
+    const barH = (d.value/max) * plotH;
+    const x = L + i*gap + (gap-bw)/2;
+    const y = h-B-barH;
+    const isFocus80 = i <= redThroughIndex;
+    if(selection.defect){
+      ctx.fillStyle = selection.defect === d.key ? '#e60012' : (isFocus80 ? '#f58a98' : '#b8d0e6');
+    }else{
+      ctx.fillStyle = isFocus80 ? '#ef3349' : '#91bee8';
+    }
+    ctx.fillRect(x,y,bw,barH);
+    chartState.pareto.hits.push({x,y,w:bw,h:barH,key:d.key});
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = mobile ? '10px sans-serif' : '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(d.value), x+bw/2, y-8);
+    cum += d.value;
+  });
+
+  cum = 0;
+  ctx.strokeStyle = '#e60012'; ctx.lineWidth = 2.5; ctx.beginPath();
+  data.forEach((d,i)=>{
+    cum += d.value;
+    const px = L + i*gap + gap/2;
+    const py = h-B - (cum/total)*plotH;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  });
+  ctx.stroke();
+
+  const y80 = h-B - 0.8*plotH;
+  ctx.setLineDash([6,5]); ctx.strokeStyle='#f59e0b'; ctx.beginPath(); ctx.moveTo(L,y80); ctx.lineTo(w-R,y80); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#b7791f'; ctx.textAlign='right'; ctx.font='12px sans-serif'; ctx.fillText('80%', w-R, y80-6);
+
+  ctx.strokeStyle='#d6dde6'; ctx.beginPath(); ctx.moveTo(L,h-B); ctx.lineTo(w-R,h-B); ctx.stroke();
+  data.forEach((d,i)=>{
+    const x = L + i*gap + gap/2;
+    const y = h-B+18;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(-Math.PI/4.4);
+    ctx.fillStyle = selection.defect === d.key ? '#b91c1c' : '#475569';
+    ctx.font = selection.defect === d.key ? 'bold 11px sans-serif' : '11px sans-serif';
+    ctx.textAlign = 'right'; ctx.fillText(defectLabel(d.key), 0, 0); ctx.restore();
+  });
+}
+
+function renderPartChart(){
+  let data = groupCount(filteredRecords('part'), 'part', META.parts.map(d=>d.key));
+  data = data.sort((a,b)=>b.value-a.value).slice(0,5);
+  renderSimpleBars('partChart', data, 'part', false);
+}
+function renderLineChart(){
+  const data = groupCount(filteredRecords('line'), 'line', META.lines.map(d=>d.key));
+  renderSimpleBars('lineChart', data, 'line', false);
+}
+function renderFinishChart(){
+  const data = groupCount(filteredRecords('finish'), 'finish', META.finishes.map(d=>d.key));
+  renderSimpleBars('finishChart', data, 'finish', false);
+}
+
+function renderSimpleBars(canvasId, data, dim, isPercent){
+  const {ctx,w,h} = setupCanvas(document.getElementById(canvasId));
+  clearChart(canvasId);
+  const L=36,B=40,T=18,R=12, plotW=w-L-R, plotH=h-B-T, gap=plotW/data.length, bw=Math.min(64, gap*0.55);
+  drawGrid(ctx,w,h,L,B,T,R,4);
+  const max = Math.max(1, ...data.map(d=>d.value))*1.18;
+
+  data.forEach((d,i)=>{
+    const barH = (d.value/max)*plotH;
+    const x = L + i*gap + (gap-bw)/2;
+    const y = h-B-barH;
+    const selectedKey = selection[dim];
+    ctx.fillStyle = selectedKey === d.key ? '#e60012' : '#91bee8';
+    if(selectedKey && selectedKey !== d.key) ctx.fillStyle = '#a8c6e2';
+    ctx.fillRect(x,y,bw,barH);
+    chartState[canvasId].hits.push({x,y,w:bw,h:barH,key:d.key});
+
+    const val = isPercent ? d.value.toFixed(2)+'%' : fmt(d.value);
+    ctx.fillStyle='#64748b'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(val, x+bw/2, y-8);
+    ctx.fillStyle = selectedKey === d.key ? '#b91c1c' : '#475569';
+    ctx.fillText(d.label, x+bw/2, h-12);
+  });
+}
+
+function currentDetailRows(){
+  return filteredRecords(null).slice().sort((a,b)=> b.datetime.localeCompare(a.datetime));
+}
+function renderTable(){
+  const rows = currentDetailRows();
+  document.getElementById('detailCount').textContent = t('detailCount')(rows.length);
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = rows.length ? rows.map(r => `
+    <tr>
+      <td>${r.datetime.replace(/-/g,'/')}</td>
+      <td>${r.site}</td>
+      <td>${r.line}</td>
+      <td>${r.part}</td>
+      <td>${r.finish}</td>
+      <td>${defectLabel(r.defect)}</td>
+      <td>${inspectorLabel(r.inspector)}</td>
+      <td><span class="dot dred"></span>NG</td>
+    </tr>`).join('') : `<tr><td colspan="8" class="muted">${t('noData')}</td></tr>`;
+}
+
+function csvEscape(value){
+  const s = String(value ?? '');
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function downloadCurrentCsv(){
+  const rows = currentDetailRows();
+  if(!rows.length){ alert(t('csvNoData')); return; }
+  const headers = currentLang==='en'?['Date/Time','Site','Line','Part No.','Finish','Defect','Area','Inspector','Result']:currentLang==='zh'?['日期时间','据点','产线','品号','仕上','不良内容','不良部位','检验类型','判定']:['日時','拠点','ライン','品番','仕上','不良内容','不良部位','検査者','判定'];
+  const lines = [headers.map(csvEscape).join(',')];
+  rows.forEach(r => {
+    lines.push([r.datetime,r.site,r.line,r.part,r.finish,defectLabel(r.defect),areaLabel(r.area),inspectorLabel(r.inspector),'NG'].map(csvEscape).join(','));
+  });
+  const csv = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const f = formFilters();
+  const from = (f.from || 'start').replaceAll('-','');
+  const to = (f.to || 'end').replaceAll('-','');
+  a.href = url;
+  a.download = `${t('csvName')}_${from}_${to}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function renderAll(){
+  updateHeaderChips();
+  updateKpis();
+  renderPareto();
+  renderPartChart();
+  renderLineChart();
+  renderFinishChart();
+  renderTable();
+}
+
+function toggleSelection(dim, key){ selection[dim] = selection[dim] === key ? null : key; renderAll(); }
+function bindCanvasClick(canvasId, dim){
+  document.getElementById(canvasId).addEventListener('click', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+    const hit = chartState[canvasId].hits.find(h => x >= h.x && x <= h.x+h.w && y >= h.y && y <= h.y+h.h + 14);
+    if(hit) toggleSelection(dim, hit.key);
+  });
+}
+
+
+function openInfoView(){
+  document.getElementById('dashboardView').classList.add('hidden');
+  document.getElementById('infoView').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeInfoView(){
+  document.getElementById('infoView').classList.remove('active');
+  document.getElementById('dashboardView').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(renderAll,80);
+}
+function switchInfoTab(panelId){
+  document.querySelectorAll('.info-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===panelId));
+  document.querySelectorAll('.info-panel').forEach(panel=>panel.classList.toggle('active',panel.id===panelId));
+}
+
+function init(){
+  setDefaultDates();
+  document.querySelectorAll('.lang-btn').forEach(btn=>btn.addEventListener('click',()=>setLanguage(btn.dataset.lang)));
+  applyStaticLanguage();
+  document.getElementById('openInfo').addEventListener('click', openInfoView);
+  document.getElementById('backDashboard').addEventListener('click', closeInfoView);
+  document.querySelectorAll('.info-tab').forEach(btn=>btn.addEventListener('click',()=>switchInfoTab(btn.dataset.tab)));
+  generateSampleData();
+  renderAll();
+  bindCanvasClick('pareto', 'defect');
+  bindCanvasClick('partChart', 'part');
+  bindCanvasClick('lineChart', 'line');
+  bindCanvasClick('finishChart', 'finish');
+
+  document.getElementById('searchBtn').addEventListener('click', renderAll);
+  document.getElementById('downloadCsv').addEventListener('click', downloadCurrentCsv);
+  document.getElementById('clearChartFilters').addEventListener('click', () => {
+    selection.defect = null; selection.part = null; selection.line = null; selection.finish = null; renderAll();
+  });
+  window.addEventListener('resize', () => { clearTimeout(window.__dashResize); window.__dashResize = setTimeout(renderAll, 120); });
+}
+init();
+</script>
+</body>
+</html>
