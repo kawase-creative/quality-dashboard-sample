@@ -42,6 +42,7 @@
   .status{display:flex;align-items:center;gap:12px}.status-ico{font-size:58px;line-height:1;font-family:Arial,"Segoe UI Symbol",sans-serif;font-variant-emoji:text}.status-ico.good{color:var(--red)}.status-ico.warning{color:#6b7280}.status-ico.bad{color:#2563eb}.status-text b{font-size:20px}.status-text span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
   .grid-main{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px}
   .grid-three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+  .grid-main > .card,.grid-three > .card{min-width:0}
   .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.card-title{font-weight:800;font-size:15px}.tag{font-size:11px;color:var(--red);background:#fff0f2;border-radius:99px;padding:5px 8px}
   .card-actions{display:flex;align-items:center;gap:8px}.download-btn{width:auto;height:34px;padding:0 14px;border-radius:9px;background:var(--green);box-shadow:none;font-size:12px}.download-btn:hover{transform:none}
   canvas{width:100%;height:280px;display:block;cursor:pointer}.small-chart canvas{height:230px}#pareto{height:360px}
@@ -96,6 +97,15 @@
     button:hover{filter:none;transform:none}
   }
 
+  @media (max-width:1100px){
+    .filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-main,.grid-three{grid-template-columns:minmax(0,1fr)}
+    .toolbar{flex-direction:column;align-items:flex-start}
+    .clear-btn{width:100%}
+    .manual-grid,.ux-grid{grid-template-columns:minmax(0,1fr)}
+  }
+
   @media (max-width:768px){
     body{overflow-x:hidden}
     .app{padding:12px}
@@ -106,13 +116,13 @@
     .brand-row{align-items:flex-start;gap:8px}
     .brand h1{font-size:19px;line-height:1.35}
     .info-btn{width:40px;height:40px;min-width:40px;font-size:19px}
-    .filters{grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+    .filters{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}
     select,input,button{height:44px;font-size:16px}
     .toolbar{padding:12px;align-items:stretch}
     .chips{min-width:0}
     .chip{max-width:100%;white-space:normal;line-height:1.4}
     .clear-btn{width:100%;height:44px}
-    .kpis{grid-template-columns:1fr 1fr;gap:10px}
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .card{padding:14px;border-radius:14px}
     .kpi{min-height:118px}
     .kpi .label{margin-bottom:10px}
@@ -123,9 +133,9 @@
     .card-actions{width:auto;margin-left:auto;justify-content:flex-end;gap:8px}
     .download-btn{height:40px;flex:none;width:auto;min-width:120px;padding:0 12px;white-space:nowrap}
     .tag{font-size:10px}
-    .chart-scroll{margin:0 -2px;padding-bottom:4px}
+    .chart-scroll{margin:0;padding-bottom:4px;overflow-x:hidden}
     .chart-scroll-pareto{overflow-x:hidden}.chart-scroll-pareto canvas{width:100%!important;min-width:0!important;max-width:100%!important;height:430px!important}
-    .small-chart .chart-scroll canvas{min-width:440px}
+    .small-chart .chart-scroll canvas{width:100%!important;min-width:0!important;max-width:100%!important}
     #pareto{height:410px}
     .small-chart canvas{height:220px}
     .table-wrap{max-height:460px}
@@ -150,16 +160,16 @@
     .brand h1{font-size:17px;word-break:keep-all}
     .brand small{font-size:10px}
     .updated{display:none}
-    .filters{grid-template-columns:1fr;gap:9px;border-radius:14px}
+    .filters{grid-template-columns:minmax(0,1fr);gap:9px;border-radius:14px}
     .filters label{font-size:12px;margin-bottom:4px}
-    .kpis{grid-template-columns:1fr;gap:9px}
+    .kpis{grid-template-columns:minmax(0,1fr);gap:9px}
     .kpi{min-height:auto}
     .kpi .sub{font-size:11px}
     .value{font-size:30px}
     .card-title{font-size:14px}
     .toolbar{margin-bottom:12px}
     .chart-scroll-pareto{overflow-x:hidden}.chart-scroll-pareto canvas{width:100%!important;min-width:0!important;max-width:100%!important;height:420px!important}
-    .small-chart .chart-scroll canvas{min-width:400px}
+    .small-chart .chart-scroll canvas{width:100%!important;min-width:0!important;max-width:100%!important}
     .card-actions{flex-direction:row;align-items:center;justify-content:flex-end;width:auto;margin-left:auto}
     .card-actions .tag{text-align:center;white-space:nowrap}
     .download-btn{width:auto;min-width:116px;padding:0 10px}
@@ -173,7 +183,6 @@
     .info-tab{font-size:12px}
   }
 
-  @media (max-width:1100px){.filters{grid-template-columns:repeat(3,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}.grid-main,.grid-three{grid-template-columns:1fr}.toolbar{flex-direction:column;align-items:flex-start}.clear-btn{width:100%}.manual-grid,.ux-grid{grid-template-columns:1fr}}
   @media (max-width:640px){.updated{display:none}}
 </style>
 </head>
@@ -719,7 +728,9 @@ function renderFinishChart(){
 function renderSimpleBars(canvasId, data, dim, isPercent){
   const {ctx,w,h} = setupCanvas(document.getElementById(canvasId));
   clearChart(canvasId);
-  const L=36,B=40,T=18,R=12, plotW=w-L-R, plotH=h-B-T, gap=plotW/data.length, bw=Math.min(64, gap*0.55);
+  const mobile = w < 520;
+  const L=mobile?24:36,B=mobile?(dim==='line'?58:42):40,T=mobile?24:18,R=mobile?6:12;
+  const plotW=w-L-R, plotH=h-B-T, gap=plotW/data.length, bw=Math.max(14,Math.min(64,gap*(mobile?0.58:0.55)));
   drawGrid(ctx,w,h,L,B,T,R,4);
   const max = Math.max(1, ...data.map(d=>d.value))*1.18;
 
@@ -734,10 +745,20 @@ function renderSimpleBars(canvasId, data, dim, isPercent){
     chartState[canvasId].hits.push({x,y,w:bw,h:barH,key:d.key});
 
     const val = isPercent ? d.value.toFixed(2)+'%' : fmt(d.value);
-    ctx.fillStyle='#64748b'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#64748b'; ctx.font=mobile?'10px sans-serif':'11px sans-serif'; ctx.textAlign='center';
     ctx.fillText(val, x+bw/2, y-8);
     ctx.fillStyle = selectedKey === d.key ? '#b91c1c' : '#475569';
-    ctx.fillText(d.label, x+bw/2, h-12);
+    ctx.font=mobile?'9px sans-serif':'11px sans-serif';
+    if(mobile && dim==='line'){
+      ctx.save();
+      ctx.translate(x+bw/2,h-8);
+      ctx.rotate(-Math.PI/4.5);
+      ctx.textAlign='right';
+      ctx.fillText(d.label,0,0);
+      ctx.restore();
+    }else{
+      ctx.fillText(d.label,x+bw/2,h-12);
+    }
   });
 }
 
