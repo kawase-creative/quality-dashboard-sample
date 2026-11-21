@@ -1,16 +1,16 @@
 # 予約メールの設定
 
-送信先: 1641494papa@gmail.com
-送信バックエンド: FormSubmit AJAX API（https://formsubmit.co/ajax/1641494papa@gmail.com）
+送信先: tatsunari.vocal.lesson@gmail.com
+送信バックエンド: FormSubmit AJAX API（https://formsubmit.co/ajax/tatsunari.vocal.lesson@gmail.com）
 公式手順: https://formsubmit.co/ と https://formsubmit.co/ajax-documentation
 
 ## 有効化が必要
 
 1. 公開ページでテスト用の内容を入力し、確認画面の「予約希望を送信する」を押す。
-2. 1641494papa@gmail.com に届く FormSubmit の確認メールを開き、有効化する。迷惑メールも確認する。
+2. tatsunari.vocal.lesson@gmail.com に届く FormSubmit の確認メールを開き、有効化する。迷惑メールも確認する。
 3. 公開ページから再度テストし、第1〜第3希望を含む予約メールが届くことを確認する。
 
-公開ページから「接続確認テスト（予約ではありません）」を送信し、送信サービスの受付表示を確認済み。受信箱への到着・受信側での有効化状況は未確認。公開ページは有効化要求・送信失敗を成功扱いしない。FormSubmitの正常応答時も「送信サービスが受け付けました」と表示し、到着や予約確定を断言しない。
+送信先を tatsunari.vocal.lesson@gmail.com に変更。新しい送信先へのテスト送信・有効化・到着確認は未実施。公開ページは有効化要求・送信失敗を成功扱いしない。FormSubmitの正常応答時も「送信サービスが受け付けました」と表示し、到着や予約確定を断言しない。
 
 ## 動作
 
