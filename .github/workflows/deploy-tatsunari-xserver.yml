@@ -1,0 +1,49 @@
+name: Deploy Tatsunari Vocal Lesson to XServer
+
+# Run manually after the domain, SSL and FTPS account are configured on XServer.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tatsunari-xserver-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Upload site to XServer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out latest website
+        uses: actions/checkout@v4
+
+      - name: Check required FTPS settings
+        env:
+          FTP_SERVER: ${{ secrets.XSERVER_FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.XSERVER_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.XSERVER_FTP_PASSWORD }}
+          FTP_DIRECTORY: ${{ vars.XSERVER_FTP_DIRECTORY }}
+        run: |
+          for key in FTP_SERVER FTP_USERNAME FTP_PASSWORD FTP_DIRECTORY; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing ${key}. Configure XServer credentials as GitHub Actions secrets and the destination folder as an Actions variable."
+              exit 1
+            fi
+          done
+          case "$FTP_DIRECTORY" in
+            */public_html/|*/public_html) ;;
+            *) echo "::error::FTP_DIRECTORY must end in /public_html/"; exit 1 ;;
+          esac
+
+      - name: Deploy only the Tatsunari website over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.XSERVER_FTP_SERVER }}
+          username: ${{ secrets.XSERVER_FTP_USERNAME }}
+          password: ${{ secrets.XSERVER_FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./tatsunari-vocal/
+          server-dir: ${{ vars.XSERVER_FTP_DIRECTORY }}
+          dangerous-clean-slate: false
